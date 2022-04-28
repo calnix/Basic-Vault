@@ -33,11 +33,40 @@ https://book.getfoundry.sh/config/continous-integration.html
 
 # Testing
 - Vault contract should be fully tested.
-- No need to test ERC20Mock
+- No need to test ERC20Mock. Assume it works as intended. 
+
+## Testing States
+**StateZero**
+(user has no tokens)
+- cannot deposit  (testUserCannotWithdraw)
+- cannot withdraw (testUserCannotDeposit)
++ fuzz testing	  (testUserMintApproveDeposit)
+** unsure to keep testUserMintApproveDeposit. but was looking for a positive test condition to end this state phase.
+
+**StateTokensMinted**
+(user has minted 100 wmd tokens)
+(only action available is deposit)
+- if transfer fails, deposit should revert (testDepositRevertsIfTransferFails)
++ deposit tokens into vault                (testDeposit)
+
+**StateTokensDeposited**
+(user has deposited tokens into Vault)
+- cannot withdraw if transfer fails     (testWithdrawRevertsIfTransferFails)
+- cannot withdraw more than deposit     (testUserCannotWithdrawExcessOfDeposit)
++ partial withdrawal                    (testUserWithdrawPartial)
++ full withdrawal	                    (testUserWithdrawAll)
+
+
+### Testing Guidelines
+- All state variable changes in the contracts that you code.
+- All state variable changes in other contracts caused by calls from contracts that you code.
+- All require or revert in the contracts that you code.
+- All events being emitted.
+- All return values in contracts that you code.
+
 
 # Deployment
-- Rinkeby
-- Deploy both contracts; token and vault.
+- Rinkeby (Deploy both contracts; token and vault)
 
 # Tenderly
 For monitoring/alerts as well as for simulating transactions before running them and also for reviewing transactions after the fact.

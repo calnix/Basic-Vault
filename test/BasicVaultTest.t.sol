@@ -12,13 +12,15 @@ abstract contract StateZero is Test {
     BasicVault public vault;
     WMDTokenWithFailedTransfers public wmd;
     address user;
-    address deployer;
+
+    event Deposited(address indexed from, uint amount);
+    event Withdrawal(address indexed from, uint amount);
 
     function setUp() public virtual {
         wmd = new WMDTokenWithFailedTransfers();
-        vault = new BasicVault(address(wmd));
+        vault = new BasicVault(wmd);
 
-        user = 0x0000000000000000000000000000000000000001;
+        user = address(1);
         vm.label(user, "user");
     }
 }
@@ -39,6 +41,14 @@ contract StateZeroTest is StateZero {
         vm.expectRevert("Insufficient balance!");
         vault.withdraw(amount);
     }
+
+    function testUserCannotDeposit(uint amount) public {
+        console2.log("User cannot deposit without tokens");
+        vm.assume(amount > 0);
+        vm.prank(user);
+        vm.expectRevert("ERC20: Insufficient approval");
+        vault.deposit(amount);
+    }
    
     function testUserMintApproveDeposit(uint amount) public {
         console2.log("User mints tokens and deposits into vault");
@@ -46,15 +56,19 @@ contract StateZeroTest is StateZero {
         vm.assume(amount > 0);
         wmd.mint(user, amount);
         wmd.approve(address(vault), amount);
+
+        vm.expectEmit(true, false, false, true);
+        emit Deposited(user, amount);
         vault.deposit(amount);
-        uint balance = vault.balances(user);
-        assertTrue(balance == amount);
+
+        assertTrue(wmd.balanceOf(user) == 0);
+        assertTrue(vault.balances(user) == amount);
         vm.stopPrank();
     }
 
 }
 
-abstract contract StateTokensMinted is StateZero {
+abstract contract StateMinted is StateZero {
     uint userTokens;
     
     function setUp() public override virtual {
@@ -65,42 +79,38 @@ abstract contract StateTokensMinted is StateZero {
         vm.prank(user);
         wmd.mint(user, userTokens);
     }
-
 }
 
-contract StateTokensMintedTest is StateTokensMinted {
-
-    function testUserCannotDepositWithoutApproval() public {
-        console2.log("User cannot deposit tokens into Vault before setting allowance");
-        vm.prank(user);
-        vm.expectRevert("ERC20: Insufficient approval");
-        vault.deposit(userTokens);
-    }
+contract StateMintedTest is StateMinted {
 
     function testDepositRevertsIfTransferFails() public {
         console2.log("Deposit transaction should revert if transfer fails");
         wmd.setFailTransfers(true);
+        
         vm.startPrank(user);
         wmd.approve(address(vault), userTokens);
         vm.expectRevert("Deposit failed!");
         vault.deposit(userTokens);
         vm.stopPrank();
-
     }
 
-    function testUserApproveAndDeposit() public {
-        console2.log("User sets allowance and deposits into Vault");
+    function testDeposit() public {
+        console2.log("User deposits into Vault");
         vm.startPrank(user);
         wmd.approve(address(vault), userTokens);
+        
+        vm.expectEmit(true, false, false, true);
+        emit Deposited(user, userTokens);
         vault.deposit(userTokens);
-        uint balance = vault.balances(user);
-        assertTrue(balance == userTokens);
+        
+        assertTrue(vault.balances(user) == userTokens);
+        assertTrue(wmd.balanceOf(user) == 0);
         vm.stopPrank();
     }
 
 }
 
-abstract contract StateTokensDeposited is StateTokensMinted {
+abstract contract StateDeposited is StateMinted {
     
     function setUp() public override virtual {
         super.setUp();  
@@ -111,13 +121,13 @@ abstract contract StateTokensDeposited is StateTokensMinted {
     }
 }
 
-contract StateTokensDepositedTest is StateTokensDeposited {
+contract StateDepositedTest is StateDeposited {
     
     function testWithdrawRevertsIfTransferFails() public {
         console2.log("Withdraw transaction should revert if transfer fails");
         wmd.setFailTransfers(true);
         vm.prank(user);
-        vm.expectRevert("Token transfer frm User to Vendor failed!");
+        vm.expectRevert("Withdrawal failed!");
         vault.withdraw(userTokens);
     }
 
@@ -129,19 +139,26 @@ contract StateTokensDepositedTest is StateTokensDeposited {
     }
 
     function testUserWithdrawPartial() public {
-        console2.log("User to partially withdraw deposits from Vault");
+        console2.log("User withdraws half of deposit from Vault");
         vm.prank(user);
+
+        vm.expectEmit(true, false, false, true);
+        emit Withdrawal(user, userTokens/2);
         vault.withdraw(userTokens/2);
-        uint balance = vault.balances(user);
-        assertTrue(balance == userTokens/2);
+
+        assertEq(vault.balances(user), userTokens/2);
+        assertEq(wmd.balanceOf(user), userTokens/2);
     }
  
     function testUserWithdrawAll() public {
-        console2.log("User to withdraw deposits from Vault");
+        console2.log("User to withdraw all deposits from Vault");
         vm.prank(user);
-        vault.withdraw(userTokens);
-        uint balance = vault.balances(user);
-        assertTrue(balance == 0);
-    }
 
+        vm.expectEmit(true, false, false, true);
+        emit Withdrawal(user, userTokens);
+        vault.withdraw(userTokens);
+
+        assertEq(vault.balances(user), 0);
+        assertEq(wmd.balanceOf(user), userTokens);
+    }
 }
