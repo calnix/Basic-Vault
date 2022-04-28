@@ -38,7 +38,7 @@ contract StateZeroTest is StateZero {
         console2.log("User cannot withdraw with no balance");
         vm.assume(amount > 0);
         vm.prank(user);
-        vm.expectRevert("Insufficient balance!");
+        vm.expectRevert(stdError.arithmeticError);
         vault.withdraw(amount);
     }
 
@@ -134,7 +134,7 @@ contract StateDepositedTest is StateDeposited {
     function testUserCannotWithdrawExcessOfDeposit() public {
         console2.log("User cannot withdraw more than he has deposited");
         vm.prank(user);
-        vm.expectRevert("Insufficient balance!");
+        vm.expectRevert(stdError.arithmeticError);
         vault.withdraw(userTokens + 100*10**18);
     }
 
