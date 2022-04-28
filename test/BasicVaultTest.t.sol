@@ -34,14 +34,6 @@ contract StateZeroTest is StateZero {
         assertTrue(balance == 0);
     }
 
-    function testUserCannotWithdraw(uint amount) public {
-        console2.log("User cannot withdraw with no balance");
-        vm.assume(amount > 0);
-        vm.prank(user);
-        vm.expectRevert(stdError.arithmeticError);
-        vault.withdraw(amount);
-    }
-
     function testUserCannotDeposit(uint amount) public {
         console2.log("User cannot deposit without tokens");
         vm.assume(amount > 0);
@@ -82,6 +74,14 @@ abstract contract StateMinted is StateZero {
 }
 
 contract StateMintedTest is StateMinted {
+
+    function testFuzzUserCannotWithdraw(uint amount) public {
+        console2.log("User cannot withdraw with no balance");
+        vm.assume(amount > 0 && amount < wmd.balanceOf(user));
+        vm.prank(user);
+        vm.expectRevert(stdError.arithmeticError);
+        vault.withdraw(amount);
+    }
 
     function testDepositRevertsIfTransferFails() public {
         console2.log("Deposit transaction should revert if transfer fails");
