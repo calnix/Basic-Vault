@@ -9,7 +9,7 @@ on:
 jobs:
   run-tests:                    # job_id value
     name: Basic Vault           # Use jobs.<job_id>.name to a name for the job, which is displayed on GitHub.
-    runs-on: windows-latest     # Container OS env
+    runs-on: ubuntu-latest     # Container OS env
     steps:
       - uses: actions/checkout@v2
         with:
