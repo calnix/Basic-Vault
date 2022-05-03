@@ -20,11 +20,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Install Yield Tools
-        uses: yieldprotocol/yield-utils-v2
-        with:
-          version: nightly
-
       - name: Run Forge tests
         run: forge test
         id: test
