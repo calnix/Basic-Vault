@@ -1,5 +1,4 @@
-forge-std/=lib\forge-std\src/
-yield-utils-v2/=lib\yield-utils-v2\
-ds-test/=lib\ds-test\src/
-test/=test\
-src/=src\
+forge-std/=lib/forge-std/src/
+yield-utils-v2/=lib/yield-utils-v2/
+test/=test/
+src/=src/
