@@ -20,11 +20,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Run Forge build
-        run: |
-          forge build 
-        id: build
-
       - name: Run Forge tests
         run: |
           forge test
