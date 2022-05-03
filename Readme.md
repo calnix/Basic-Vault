@@ -67,6 +67,8 @@ https://book.getfoundry.sh/config/continous-integration.html
 
 # Deployment
 - Rinkeby (Deploy both contracts; token and vault)
+- WMD Token: https://rinkeby.etherscan.io/address/0x944403ee436a6dff974983a2fa84ff37c587bad1#writeContract
+- Vault: https://rinkeby.etherscan.io/address/0xc5a93d9c0337352f0c2fd2743a2ffffd69818486#writeContract
 
 # Tenderly
 For monitoring/alerts as well as for simulating transactions before running them and also for reviewing transactions after the fact.
