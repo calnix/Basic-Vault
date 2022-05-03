@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "yield-utils-v2/token/IERC20.sol";
+import "yield-utils-v2/contracts/token/IERC20.sol";
 
 /**
 @title An on-chain name registry

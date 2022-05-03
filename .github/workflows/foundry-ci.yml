@@ -11,12 +11,17 @@ jobs:
     name: Basic Vault           # Use jobs.<job_id>.name to a name for the job, which is displayed on GitHub.
     runs-on: ubuntu-latest      # Container OS env
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Yield Tools
+        uses: yieldprotocol/yield-utils-v2
         with:
           version: nightly
 
