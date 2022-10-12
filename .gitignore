@@ -1,2 +1,5 @@
 cache/
 out/
+.env
+test/WMDTokenTest.t.text
+Notes.md
